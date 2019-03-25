@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
         mTextView = findViewById(R.id.myTextView);
         etUserName = findViewById(R.id.username);
         etEmailId = findViewById(R.id.email);
-
+        initProgressBar();
         etUserName.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
