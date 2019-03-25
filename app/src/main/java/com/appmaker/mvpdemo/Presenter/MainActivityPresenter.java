@@ -15,10 +15,13 @@ public class MainActivityPresenter {
     }
 
     public void updateFullName(String fName) {
-
+        mUser.setFullName(fName);
+        mView.updateUserInfoTextView(mUser.toString());
     }
 
     public void updateEmail(String eMail) {
+        mUser.setEmailId(eMail);
+        mView.updateUserInfoTextView(mUser.toString());
 
     }
 
