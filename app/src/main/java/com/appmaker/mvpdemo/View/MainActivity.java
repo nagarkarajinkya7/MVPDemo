@@ -1,11 +1,15 @@
 package com.appmaker.mvpdemo.View;
 
+import android.app.ProgressDialog;
 import android.content.res.Resources;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -13,17 +17,22 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 
+import com.appmaker.mvpdemo.Model.DataModel;
 import com.appmaker.mvpdemo.Presenter.MainActivityPresenter;
 import com.appmaker.mvpdemo.R;
 
 import org.w3c.dom.Text;
 
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity implements MainActivityPresenter.View {
 
     private MainActivityPresenter mainActivityPresenter;
-    private TextView mTextView;
-    private ProgressBar mProgressBar;
-    private EditText etUserName, etEmailId;
+    private RecyclerView mRecyclerView;
+    private ProgressDialog mProgressDialog;
+    private CustomAdapter mCustomAdapter;
+
+    private final String JSON_URL = "https://demonuts.com/Demonuts/JsonTest/Tennis/json_parsing.php";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,68 +44,45 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
 
         mainActivityPresenter = new MainActivityPresenter(this);
 
-        mTextView = findViewById(R.id.myTextView);
-        etUserName = findViewById(R.id.username);
-        etEmailId = findViewById(R.id.email);
         initProgressBar();
-        etUserName.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                mainActivityPresenter.updateFullName(s.toString());
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                hideProgressBar();
-            }
-        });
-
-        etEmailId.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                mainActivityPresenter.updateEmail(s.toString());
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                hideProgressBar();
-            }
-        });
-
+        mainActivityPresenter.fetchJSONData(JSON_URL);
     }
 
     private void initProgressBar() {
-        mProgressBar = new ProgressBar(this, null, android.R.attr.progressBarStyleSmall);
-        mProgressBar.setIndeterminate(true);
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(Resources.getSystem().getDisplayMetrics().widthPixels,
-                250);
-        params.addRule(RelativeLayout.CENTER_IN_PARENT);
-        this.addContentView(mProgressBar, params);
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setMessage("Loading data...");
+        mProgressDialog.setCancelable(false);
         showProgressBar();
     }
 
     @Override
     public void updateUserInfoTextView(String info) {
-        mTextView.setText(info);
+        //mTextView.setText(info);
+    }
+
+    @Override
+    public void updateUserView(List<DataModel> dataModel) {
+        mRecyclerView = findViewById(R.id.rv);
+        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mCustomAdapter = new CustomAdapter(this, dataModel);
+        hideProgressBar();
+        mRecyclerView.setAdapter(mCustomAdapter);
+    }
+
+    @Override
+    public void updateErrorInfo() {
+        hideProgressBar();
+        Log.v(MainActivity.class.getSimpleName(), "error");
     }
 
     @Override
     public void showProgressBar() {
-        mProgressBar.setVisibility(View.VISIBLE);
+        mProgressDialog.show();
     }
 
     @Override
     public void hideProgressBar() {
-        mProgressBar.setVisibility(View.INVISIBLE);
+        mProgressDialog.dismiss();
     }
 }
